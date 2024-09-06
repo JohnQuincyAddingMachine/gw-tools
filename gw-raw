@@ -143,7 +143,7 @@ function map
 	hxcfe -script:"$hxc" -finput:"$project_dir/$raw" -foutput:"$project_dir/$raw_name-raw$revs".bmp -conv:BMP_DISK_IMAGE
 	cd "$project_dir"
 
-	convert "$raw_name-raw$revs".bmp "$raw_name-raw$revs".png
+	magick "$raw_name-raw$revs".bmp "$raw_name-raw$revs".png
 	rm "$raw_name-raw$revs".bmp
 }
 

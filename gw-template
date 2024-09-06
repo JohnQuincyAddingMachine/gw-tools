@@ -7,6 +7,9 @@
 # Get project name
 name="$1"
 
+# Set disk size for scanning
+disk_size=""
+
 # Include parent script
 if [[ -f "./gw-raw" ]]
 then

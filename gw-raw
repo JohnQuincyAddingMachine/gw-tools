@@ -11,6 +11,15 @@ invalid_revs=8
 revs=$default_revs
 pass=1
 
+# Floppy scanning. 1: run scanimage, 0: Don't scan that floppy
+scanimage=0
+# Use 'scanimage -L' to determine your scanner name
+scanner="pixma:04A91912_4669BE"
+# Script will scan an image based on the physical size of the disk.
+# Add values below to use alternate values.
+disk_xsize_override=""
+disk_ysize_override=""
+
 # Log file names
 log_rip="$timestamp-$pass-$name-raw.log"
 log_decode="$timestamp-$pass-$name-decode.log"
@@ -95,6 +104,12 @@ function rip # 1-Drive 2-Tracks
 	else
 		revs=$default_revs
 	fi
+	if [[ "$scanimage" == "1" ]]
+	then
+		scan
+	else
+		echo "Disk scanning disabled, skipping..."
+	fi
 }
 
 # Use log file from gw to check if the rip was valid
@@ -143,8 +158,50 @@ function map
 	hxcfe -script:"$hxc" -finput:"$project_dir/$raw" -foutput:"$project_dir/$raw_name-raw$revs".bmp -conv:BMP_DISK_IMAGE
 	cd "$project_dir"
 
-	magick "$raw_name-raw$revs".bmp "$raw_name-raw$revs".png
+	convert "$raw_name-raw$revs".bmp "$raw_name-raw$revs".png
 	rm "$raw_name-raw$revs".bmp
+}
+
+# Use flatbed scanner to save an image of the floppy itself
+function scan
+{
+	if [[ "$(which scanimage)" == "" ]]
+	then
+		echo "'scanimage' is not installed or not in PATH. Cannot scan."
+		return 1
+	fi
+
+	if [[ "$disk_xsize_override" == "" && "$disk_ysize_override" == "" ]]
+	then
+		if [[ ! "$disk_size" == "3.5" && ! "$disk_size" == "5.25" || "$disk_size" == "" ]]
+		then
+			echo "Variable 'disk_size' not set or unknown size, defaulting to an 8"\"" disk."
+			disk_xsize="203.5"
+			disk_xsize="203.5"
+		else
+			if [[ $disk_size == "5.25" ]]
+			then
+				disk_xsize="133.5"
+				disk_ysize="133.5"
+			fi
+			
+			if [[ $disk_size == "3.5" ]]
+			then
+				disk_xsize="90.5"
+				disk_ysize="93.5"
+			fi
+		fi
+	else
+		echo "Default scanning dimensions overridden, using "$disk_xsize_override"x"$disk_ysize_override"mm."
+		disk_xsize="$disk_xsize_override"
+		disk_ysize="$disk_ysize_override"
+	fi
+	
+	read -n1 -r -p "Place disk on scanner. Press any key to begin scan." key
+	echo ""; echo ""
+	echo "Scanning floppy disk..."
+	# Overkill resolution. Could be changed to 300dpi and/or jpeg if preferred.
+	scanimage -d "$scanner" -x"$disk_xsize" -y"$disk_ysize" --mode color --resolution 600 --format png -o "$project_dir"/"$raw_name"_floppyscan.png
 }
 
 # This function should be overloaded in a format script

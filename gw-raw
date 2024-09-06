@@ -173,22 +173,26 @@ function scan
 
 	if [[ "$disk_xsize_override" == "" && "$disk_ysize_override" == "" ]]
 	then
-		if [[ ! "$disk_size" == "3.5" && ! "$disk_size" == "5.25" || "$disk_size" == "" ]]
+		if [[ ! "$disk_size" == "3.5" && ! "$disk_size" == "5.25" && ! "$disk_size" == "8" || "$disk_size" == "" ]]
 		then
 			echo "Variable 'disk_size' not set or unknown size, defaulting to an 8"\"" disk."
 			disk_xsize="203.5"
 			disk_xsize="203.5"
 		else
+			if [[ $disk_size == "8" ]]
+			then
+				disk_xsize="203.5"
+				disk_ysize="203.5"
+			fi
 			if [[ $disk_size == "5.25" ]]
 			then
 				disk_xsize="133.5"
 				disk_ysize="133.5"
 			fi
-			
 			if [[ $disk_size == "3.5" ]]
 			then
 				disk_xsize="90.5"
-				disk_ysize="93.5"
+				disk_ysize="94"
 			fi
 		fi
 	else

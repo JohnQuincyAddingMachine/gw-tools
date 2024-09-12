@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # check for config file and install one if needed
-if [[ ! -f $HOME/.config/gw-tools.conf && ! $HOME/.gw-tools.conf ]]
+if [[ ! -f $HOME/.config/gw-tools.conf && ! -f $HOME/.gw-tools.conf ]]
 	then
 		echo "No configuration file found."
 		if [[ -e $HOME/.config ]]
